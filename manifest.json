@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "N/S Result",
+  "version": "3.0",
+  "description": "N/S高生が使える成績確認アプリ",
+  "icons": {
+    "32": "icon/32.png",
+    "48": "icon/48.png",
+    "64": "icon/64.png",
+    "128": "icon/128.png"
+  },
+  "action": {
+    "default_icon": {
+      "32": "icon/32.png",
+      "48": "icon/48.png",
+      "64": "icon/64.png",
+      "128": "icon/128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.nnn.ed.jp/mypage/result/pc/list/index",
+        "*://*.nnn.ed.jp/mypage/result/pc/list/index?*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [{"resources": ["/icon.svg","/logo.svg"],
+  "matches": ["*://*.nnn.ed.jp/*"]}]
+}
