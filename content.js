@@ -392,7 +392,7 @@ function launch_nsresult() {
     div.style.animation = "fadein 0.5s";
     div.style.overflowY = "scroll";
     var style = document.createElement("style");
-    style.innerHTML = ':root{--text:#333;--gray:#ddd;--grayb:#eee;--gray-text:#999;--back:#f5f5f5;--hback:#fff;--red:#ff3333;--green:#58C07F;}#nsresult{background:var(--back);color:var(--text);font-family:"Noto Sans JP", sans-serif;}#nsresult #nsresult-section-first{flex-wrap:nowrap;}#nsresult .card{margin:5px 10px;padding:20px;border-radius:10px;width:100%;background:var(--hback);box-shadow:0px 0px 25px rgba(0,0,0,0.08);}#nsresult .report-card{width:calc(100% / 3 - 60px);}#nsresult header{background:var(--hback);box-shadow:0px 0px 10px rgba(0, 0, 0, 0.2);}@media(prefers-color-scheme:dark){:root{--text:#eee;--gray:#555;--grayb:#333;--gray-text:#777;--back:#222;--hback:#323232;--green:#4ab06c;--logo-filter:invert(99%) sepia(3%) saturate(1245%) hue-rotate(218deg) brightness(111%) contrast(87%);}#nsresult header{box-shadow:none;}#nsresult .card{box-shadow:none;}}@media screen and (max-width: 800px){#nsresult #nsresult-section-first{flex-wrap:wrap;}#nsresult .report-card{width:calc(100% / 2 - 60px);}}@media screen and (max-width: 600px){#nsresult .report-card{width:calc(100% - 60px);}}';
+    style.innerHTML = ':root{--text:#333;--gray:#ddd;--grayb:#eee;--gray-text:#999;--back:#f5f5f5;--hback:#fff;--red:#ff3333;--green:#58C07F;}#nsresult{background:var(--back);color:var(--text);font-family:"Noto Sans JP", sans-serif;}#nsresult #nsresult-section-first{flex-wrap:nowrap;}#nsresult .card{margin:10px 10px;padding:20px;border-radius:10px;width:100%;background:var(--hback);box-shadow:0px 0px 25px rgba(0,0,0,0.08);}#nsresult .report-card{width:calc(100% / 3 - 60px);}#nsresult header{background:var(--hback);box-shadow:0px 0px 10px rgba(0, 0, 0, 0.2);}@media(prefers-color-scheme:dark){:root{--text:#eee;--gray:#555;--grayb:#333;--gray-text:#777;--back:#222;--hback:#323232;--green:#4ab06c;--logo-filter:invert(99%) sepia(3%) saturate(1245%) hue-rotate(218deg) brightness(111%) contrast(87%);}#nsresult header{box-shadow:none;}#nsresult .card{box-shadow:none;}}@media screen and (max-width: 800px){#nsresult #nsresult-section-first{flex-wrap:wrap;}#nsresult .report-card{width:calc(100% / 2 - 60px);}}@media screen and (max-width: 600px){#nsresult .report-card{width:calc(100% - 60px);}}';
     div.append(style);
     var style = document.createElement("style");
     style.innerHTML = "@keyframes fadein{from{opacity:0;}to{opacity:1;}}@keyframes fadeout{from{opacity:1;}to{opacity:0;}}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(359deg);}}@keyframes slidein{0%{transform:translateX(20px);opacity:0;}100%{transform:translateX(0px);opacity:1;}}@keyframes slideout{0%{transform:translateX(0px);opacity:1;}100%{transform:translateX(-20px);opacity:0;}}";
@@ -402,6 +402,10 @@ function launch_nsresult() {
     header.style.width = "calc(100% - 40px)";
     header.style.padding = "10px 20px";
     header.style.display = "flex";
+    header.style.position = "fixed";
+    header.style.top = "0";
+    header.style.left = "0";
+    header.style.zIndex = "1001";
     var header_div = document.createElement("div");
     header_div.style.margin = "auto";
     header_div.style.maxWidth = "1000px";
@@ -485,7 +489,7 @@ function launch_nsresult() {
     var main = document.createElement("div");
     main.style.maxWidth = "800px";
     main.style.margin = "0px auto";
-    main.style.padding = "40px 20px 20px 20px";
+    main.style.padding = "calc(40px + 50px) 20px 20px 20px";
     main.style.overflowX = "hidden";
     main.id = "nsresult-main";
     div.append(main);
