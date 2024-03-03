@@ -378,6 +378,7 @@ function write_report(change=false,close=false) {
 }
 
 function launch_nsresult() {
+    if (document.getElementById("nsresult") !== null) return;
     var report = parse_report();
     document.body.style.overflow = "hidden";
     var div = document.createElement("div");
@@ -534,4 +535,5 @@ if (btn !== null) {
     newbtn.value = "N/S Resultで表示";
     newbtn.onclick = launch_nsresult;
     btn.parentNode.insertBefore(newbtn, btn);
+    if (new URLSearchParams(window.location.search).get('mode') === 'new') launch_nsresult();
 }
