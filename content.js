@@ -307,7 +307,7 @@ function write_report(change=false,close=false) {
             div2.style.borderRadius = "10px";
             div.append(div2);
             card.append(div);
-            if (r[j].score === "100%") {
+            if (r[j].done !== "100%") {
                 section1.append(card);
             } else {
                 section2.append(card);
