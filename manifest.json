@@ -3,6 +3,7 @@
   "name": "N/S Result",
   "version": "3.0",
   "description": "N/S高生が使える成績確認アプリ",
+  "permissions": ["storage"],
   "icons": {
     "32": "icon/32.png",
     "48": "icon/48.png",
@@ -22,13 +23,14 @@
     {
       "matches": [
         "*://*.nnn.ed.jp/mypage/result/pc/list/index",
-        "*://*.nnn.ed.jp/mypage/result/pc/list/index?*"
+        "*://*.nnn.ed.jp/mypage/result/pc/list/index?*",
+        "*://*.nnn.ed.jp/p_mypage/result/pc/index",
+        "*://*.nnn.ed.jp/p_mypage/result/pc/index?*"
       ],
       "js": [
         "content.js"
       ]
     }
   ],
-  "web_accessible_resources": [{"resources": ["/icon.svg","/logo.svg"],
-  "matches": ["*://*.nnn.ed.jp/*"]}]
+  "web_accessible_resources": [{"resources": ["/icon.svg","/logo.svg"],"matches": ["*://*.nnn.ed.jp/*"]}]
 }

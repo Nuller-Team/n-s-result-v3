@@ -1,9 +1,11 @@
 function parse_report() {
-    var result = document.getElementById("result_table");
+    var result = document.getElementById("nsresult_custom_table") || document.getElementById("result_table");
     var cols = result.querySelector(".header_item_names").children[1].colSpan-1;
     var sj1 = result.querySelectorAll(".subject_1st_row");
     var sj2 = result.querySelectorAll(".subject_2st_row");
-    var oyear = Number(document.getElementById("studentTermId").querySelector("[selected]").innerText.split("年")[0]);
+    var select_year = document.getElementById("nsresult-select-year");
+    if (select_year === null) select_year = document.getElementById("studentTermId");
+    var oyear = Number(select_year.options[select_year.selectedIndex].innerText.split("年")[0]);
     var reports = {};
     var categories = {};
     for (let i=0;i<sj1.length;i++){
@@ -24,7 +26,7 @@ function parse_report() {
             }
             llm = m;
             var tday = year+"/"+m.toString().padStart(2,"0")+"/"+d.toString().padStart(2,"0");
-            if (reports[tday] === undefined) reports[tday] = [];
+            if (reports[tday] === undefined) reports[tday] = {};
             reports[tday][cname] = {"done":st.children[lo+1].innerText,"score":sp.children[lo+1].innerText};
             if (categories[cname] === undefined) categories[cname] = {};
             categories[cname][tday] = {"done":st.children[lo+1].innerText,"score":sp.children[lo+1].innerText};
@@ -32,6 +34,72 @@ function parse_report() {
     }
     var data = {"reports":reports,"categories":categories};
     return data;
+}
+
+function gen_month_select(select_month, report) {
+    select_month.innerHTML = "";
+    console.log(report);
+    var selected = false;
+    Object.keys(report.reports).sort().forEach(e=>{
+        var option = document.createElement("option");
+        option.value = e;
+        option.innerText = e;
+        if (!selected && Object.values(report.reports[e]).some(e=>e.done !== "100%")) {
+            option.selected = true;
+            selected = true;
+        }
+        select_month.append(option);
+    });
+    var option = document.createElement("option");
+    option.value = "all";
+    option.innerText = "全期間";
+    if (!selected) option.selected = true;
+    select_month.append(option);
+    select_month.onchange = function(){
+        write_report(true);
+    }
+}
+
+function load_year() {
+    var main = document.getElementById("nsresult");
+    var load = cload();
+    load.style.animation = "fadein 0.25s";
+    main.append(load);
+    var year = document.getElementById("nsresult-select-year").value;
+    var url = new URL(window.location.href);
+    url.searchParams.set("studentTermId",year);
+    url.searchParams.set("mode","new");
+    var ajax = new XMLHttpRequest();
+    ajax.open("GET",url.href,true);
+    ajax.onload = function(){
+        var table = document.getElementById("nsresult_custom_table");
+        if (table === null){
+            var table_parent = document.createElement("div");
+            table_parent.style.height = "0px";
+            table_parent.style.width = "0px";
+            table_parent.style.overflow = "hidden";
+            table_parent.style.opacity = "0";
+            table = document.createElement("table");
+            table.id = "nsresult_custom_table";
+            table_parent.append(table);
+            main.append(table_parent);
+        }
+        var table_html = ajax.responseText.split('<table id="result_table">')[1];
+        if (table_html === undefined) {
+            location.href = url.href;
+        }
+        table.innerHTML = table_html.split("</table>")[0];
+        var select_month = document.getElementById("nsresult-select-month");
+        var report = parse_report();
+        gen_month_select(select_month, report);
+        write_report();
+        load.style.animation = "fadeout 0.25s";
+        load.style.opacity = "0";
+        setTimeout(function(){
+            load.remove();
+        },250);
+    }
+    ajax.send();
 }
 
 function cload() {
@@ -116,6 +184,26 @@ function write_report(change=false,close=false) {
     var perc = Math.floor(done/total*100);
     var main = document.getElementById("nsresult-main");
     main.innerHTML = "";
+    var title = document.createElement("div");
+    title.style.width = "100%";
+    title.style.display = "flex";
+    title.style.marginLeft = "10px";
+    title.style.marginTop = "0px";
+    title.style.marginBottom = "20px";
+    var span = document.createElement("span");
+    span.className = "material-symbols-outlined";
+    span.innerText = "calendar_month";
+    span.style.fontSize = "28px";
+    span.style.margin = "auto 3px";
+    span.classList.add("anim");
+    title.append(span);
+    var h2 = document.createElement("h2");
+    h2.style.margin = "0px";
+    h2.style.fontSize = "28px";
+    h2.classList.add("anim");
+    h2.innerText = end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月";
+    title.append(h2);
+    main.append(title);
     var section = document.createElement("div");
     section.style.width = "100%";
     section.style.display = "flex";
@@ -177,7 +265,7 @@ function write_report(change=false,close=false) {
     span.innerText = diff;
     span.style.color = rg;
     div.append(span);
-    div.append(document.createTextNode(" 日"+(back?"前":"")));
+    if (end !== "all") div.append(document.createTextNode(" 日"+(back?"前":"")));
     card.append(div);
     cards.append(card);
     section.append(cards);
@@ -279,13 +367,13 @@ function write_report(change=false,close=false) {
             var par = document.createElement("div");
             par.style.marginLeft = "auto";
             par.style.color = rg;
-            var span1 = document.createElement("span1");
+            var span1 = document.createElement("span");
             span1.style.margin = "0px 0px 0px auto";
             span1.style.fontSize = "1.5em";
             span1.style.fontWeight = "bold";
             span1.innerText = r[j].done.replace("%","");
             par.append(span1);
-            var span2 = document.createElement("span2");
+            var span2 = document.createElement("span");
             span2.style.fontSize = "1.1em";
             span2.style.marginLeft = "3px";
             span2.innerText = "%";
@@ -421,6 +509,25 @@ function launch_nsresult() {
     right.style.margin = "auto 0px";
     right.style.marginLeft = "auto";
     right.style.display = "flex";
+    var select_year = document.createElement("select");
+    select_year.style.padding = "5px 10px";
+    select_year.style.border = "solid 1px var(--gray)";
+    select_year.style.borderRadius = "5px";
+    select_year.style.marginRight = "10px";
+    select_year.style.background = "var(--hback)";
+    select_year.style.color = "var(--text)";
+    select_year.id = "nsresult-select-year";
+    document.getElementById("studentTermId").querySelectorAll("option").forEach(e=>{
+        var option = document.createElement("option");
+        option.value = e.value;
+        option.innerText = e.innerText;
+        select_year.append(option);
+    });
+    select_year.selectedIndex = document.getElementById("studentTermId").selectedIndex;
+    select_year.onchange = function(){
+        load_year();
+    }
+    right.append(select_year);
     var select_month = document.createElement("select");
     select_month.style.padding = "5px 10px";
     select_month.style.border = "solid 1px var(--gray)";
@@ -429,19 +536,7 @@ function launch_nsresult() {
     select_month.style.background = "var(--hback)";
     select_month.style.color = "var(--text)";
     select_month.id = "nsresult-select-month";
-    Object.keys(report.reports).sort().forEach(e=>{
-        var option = document.createElement("option");
-        option.value = e;
-        option.innerText = e;
-        select_month.append(option);
-    });
-    var option = document.createElement("option");
-    option.value = "all";
-    option.innerText = "全て";
-    select_month.onchange = function(){
-        write_report(true);
-    }
-    select_month.append(option);
+    gen_month_select(select_month, report);
     right.append(select_month);
     var close = document.createElement("button");
     close.style.margin = "auto 0px";
@@ -540,4 +635,7 @@ if (btn !== null) {
     newbtn.onclick = launch_nsresult;
     btn.parentNode.insertBefore(newbtn, btn);
     if (new URLSearchParams(window.location.search).get('mode') === 'new') launch_nsresult();
+    if (document.getElementById("studentTermId").selectedIndex === document.getElementById("studentTermId").options.length-1) {
+        chrome.storage.local.set({"result_page": location.origin+location.pathname, "reports": parse_report(), "updated": Date.now()},function(){});
+    }
 }

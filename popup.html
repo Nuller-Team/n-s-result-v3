@@ -1,52 +1,60 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            background-color: rgb(255, 255, 255);
-        }
-
-        h1,
-        h2,
-        h3 {
-            text-align: center;
-            color: rgb(83, 83, 83);
-        }
-
-        div {
-            margin-top: 2em;
-            margin-bottom: 2em;
-            width: 200px;
-            display: flex;
-            height: 50px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        a {
-            padding: 16px;
-            font-size: 18px;
-            background-color: #0026a1;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            text-decoration: none;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>N/SResult</h1>
-    <h3>成績を素早く確認</h3>
-    <div>
-        <a href="https://secure.nnn.ed.jp/mypage/result/pc/list/index?mode=new" target="_blank">成績を見る(N高)</a>
-
-    </div>
-    <div>
-        <a href="https://s-secure.nnn.ed.jp/mypage/result/pc/list/index?mode=new" target="_blank">成績を見る(S高)</a>
-    </div>
-</body>
-
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&amp;display=swap">
+        <style>
+            :root {
+                --hback: #eee;
+                --color: #333;
+                --back: #fff;
+                --green: #48B06F;
+                --gray:#ddd;
+                --grayb:#eee;
+                --gray-text:#999;
+            }
+            body {
+                margin: 0;
+                background-color: var(--back);
+                width: 300px;
+                height: 400px;
+                overflow: hidden;
+                color: var(--color);
+                font-family: "Noto Sans JP", sans-serif;
+            }
+            .report {
+                background: var(--back);
+                margin: 10px 0;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <script src="/popup.js"></script>
+        <div style="background:var(--hback);width:calc(100% - 40px);height:24px;padding:10px 20px;display:flex;">
+            <img src="/logo.svg" height="24">
+            <div style="display:flex;margin-left:auto;">
+                <a class="material-symbols-outlined" id="open_btn" target="_blank" style="color:var(--color);text-decoration:none;">open_in_new</a>
+            </div>
+        </div>
+        <div style="width:100%;height:100%;z-index:1000;display:none;" id="no_data">
+            <div style="margin:auto;">
+                データがありません。<br>
+                成績確認画面を開いて下さい。
+            </div>
+        </div>
+        <div style="width:100%;height:100%;z-index:1000;display:none;" id="end_reports">
+            <div style="margin:auto;text-align:center;">
+                <h1 style="color:var(--green);margin:0px;">年間レポート完了</h1>
+                <h2 style="margin:0px;">お疲れ様でした！</h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 231.62 340.46" width="100" style="margin:20px;"><g><path d="M94.7,122.03h0c0-3.89,3.15-7.04,7.04-7.04h28.16c1.87,0,3.66.74,4.98,2.06,1.32,1.32,2.06,3.11,2.06,4.98v93.42c0,3.89-3.15,7.04-7.04,7.04h-28.16c-3.89,0-7.04-3.15-7.04-7.04v-93.42Z" fill="#bf9000" fill-rule="evenodd" stroke-width="0"/><path d="M213.64,0v72.57h0c0,40.08-43.79,72.57-97.81,72.57S18.01,112.64,18.01,72.57V0h195.62Z" fill="#f1c232" fill-rule="evenodd" stroke-width="0"/><path d="M64.2,222.48v-11.21h0c0-6.19,23.11-11.21,51.62-11.21s51.62,5.02,51.62,11.21v11.21h-103.24Z" fill="#f1c232" fill-rule="evenodd" stroke-width="0"/><path d="M32.57,240.4h0c0-9.89,8.02-17.92,17.92-17.92h130.69c4.75,0,9.31,1.89,12.67,5.25,3.36,3.36,5.25,7.92,5.25,12.67v71.66c0,9.89-8.02,17.92-17.92,17.92H50.48c-9.89,0-17.92-8.02-17.92-17.92v-71.66Z" fill="#b45f06" fill-rule="evenodd" stroke-width="0"/><path d="M64.2,248.73h0s0,0,0,0h103.24s0,0,0,0c0,0,0,0,0,0v54.99s0,0,0,0h-103.24s0,0,0,0v-54.99Z" fill="#f1c232" fill-rule="evenodd" stroke-width="0"/><path d="M0,321.77h0c0-2.06,1.67-3.74,3.74-3.74h224.15c.99,0,1.94.39,2.64,1.09.7.7,1.09,1.65,1.09,2.64v14.95c0,2.06-1.67,3.74-3.74,3.74H3.74c-2.06,0-3.74-1.67-3.74-3.74v-14.95Z" fill="#783f04" fill-rule="evenodd" stroke-width="0"/></g><path d="M133.37,86.93v9h-35v-9h11.23v-34.92l-12.39,4.68v-9.94l18.51-6.91h6.48v47.09h11.16Z" fill="#fff" stroke-width="0"/></svg>
+            </div>
+        </div>
+        <div style="padding:0px 20px;display:block;height:calc(400px - 24px - 30px);overflow:scroll;padding-bottom:30px;" id="reports">
+        </div>
+        <div style="position:fixed;right:0;bottom:0;font-size:10px;color:var(--gray-text);background:var(--back);padding:5px 10px;" id="last_update"></div>
+    </body>
 </html>
