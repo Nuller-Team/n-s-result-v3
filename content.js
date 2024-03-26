@@ -353,7 +353,7 @@ function write_report(change=false,close=false) {
             h4.style.fontWeight = "normal";
             h4.style.fontSize = "0.8em";
             h4.style.color = "var(--gray-text)";
-            h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"";
+            h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"無カテゴリ";
             card.append(h4);
             var div = document.createElement("div");
             div.style.display = "flex";

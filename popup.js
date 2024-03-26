@@ -13,7 +13,8 @@ chrome.storage.local.get('result_page', function (result) {
         url.searchParams.set("mode", "new");
         document.getElementById("open_btn").href = url.href;
     } else {
-        document.getElementById("open_btn").style.display = "none";
+        document.getElementById("open_btn").style.color = "var(--gray-text)";
+        document.getElementById("open_btn").style.cursor = "not-allowed";
     }
 });
 chrome.storage.local.get('reports', function (result) {
@@ -52,6 +53,10 @@ chrome.storage.local.get('reports', function (result) {
         var subject_name = document.createElement("span");
         subject_name.innerText = subject;
         subject_name.style.fontSize = "14px";
+        subject_name.style.overflow = "hidden";
+        subject_name.style.textOverflow = "ellipsis";
+        subject_name.style.whiteSpace = "nowrap";
+        subject_name.style.width = "calc(100% - 50px)";
         subject_div.append(subject_name);
         var subject_done_parent = document.createElement("div");
         var subject_done = document.createElement("span");
