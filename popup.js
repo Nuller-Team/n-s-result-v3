@@ -1,3 +1,8 @@
+window.onload = function () {
+    setTimeout(function () {
+        document.getElementById("load").classList.add("load");
+    }, 1000);
+};
 chrome.storage.local.get('updated', function (result) {
     if (result.updated) {
         document.getElementById("reports").style.display = "block";
@@ -24,9 +29,18 @@ chrome.storage.local.get('reports', function (result) {
     var reports_div = document.getElementById("reports");
     var next = null;
     for (var month in reports["reports"]) {
-        if (reports["reports"][month]["done"] === "100%") continue;
-        next = month;
-        break;
+        var m_report = reports["reports"][month];
+        var done = true;
+        for (var subject in m_report) {
+            if (m_report[subject]["done"] !== "100%") {
+                done = false;
+                break;
+            }
+        }
+        if (!done) {
+            next = month;
+            break;
+        }
     }
     if (next === null) {
         reports_div.style.display = "none";
