@@ -5,6 +5,7 @@ chrome.storage.local.get('updated', function (result) {
         document.getElementById("last_update").innerText = "最終更新: "+updated.getFullYear()+"/"+(updated.getMonth()+1)+"/"+updated.getDate()+" "+updated.getHours()+":"+updated.getMinutes();
     } else {
         document.getElementById("no_data").style.display = "flex";
+        document.getElementById("reports").style.display = "none";
     }
 });
 chrome.storage.local.get('result_page', function (result) {
