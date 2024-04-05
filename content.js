@@ -7,7 +7,6 @@ function parse_report() {
     if (select_year === null) select_year = document.getElementById("studentTermId");
     var oyear = Number(select_year.options[select_year.selectedIndex].innerText.split("年")[0]);
     var reports = {};
-    var categories = {};
     for (let i=0;i<sj1.length;i++){
         var sj = sj1[i];
         var st = sj2[i*2];
@@ -27,13 +26,11 @@ function parse_report() {
             llm = m;
             var tday = year+"/"+m.toString().padStart(2,"0")+"/"+d.toString().padStart(2,"0");
             if (reports[tday] === undefined) reports[tday] = {};
-            reports[tday][cname] = {"done":st.children[lo+1].innerText,"score":sp.children[lo+1].innerText};
-            if (categories[cname] === undefined) categories[cname] = {};
-            categories[cname][tday] = {"done":st.children[lo+1].innerText,"score":sp.children[lo+1].innerText};
+            if (reports[tday][cname] === undefined) reports[tday][cname] = [];
+            reports[tday][cname].push({"done":st.children[lo+1].innerText,"score":sp.children[lo+1].innerText});
         }
     }
-    var data = {"reports":reports,"categories":categories};
-    return data;
+    return {"reports":reports};
 }
 
 function gen_month_select(select_month, report) {
@@ -44,7 +41,7 @@ function gen_month_select(select_month, report) {
         var option = document.createElement("option");
         option.value = e;
         option.innerText = e;
-        if (!selected && Object.values(report.reports[e]).some(e=>e.done !== "100%")) {
+        if (!selected && Object.values(report.reports[e]).some(e=>e.some(e=>e.done !== "100%"))) {
             option.selected = true;
             selected = true;
         }
@@ -175,10 +172,12 @@ function write_report(change=false,close=false) {
     for (let i in targets){
         var r = report.reports[targets[i]];
         for (let j in r){
-            report_count += 1;
-            if (r[j].done === "100%") report_done++;
-            done += Number(r[j].done.replace("%",""));
-            total += 100;
+            for (let k in r[j]){
+                report_count += 1;
+                if (r[j].done === "100%") report_done++;
+                done += Number(r[j][k].done.replace("%",""));
+                total += 100;
+            }
         }
     }
     var perc = Math.floor(done/total*100);
@@ -318,87 +317,89 @@ function write_report(change=false,close=false) {
     for (let i in targets){
         var r = report.reports[targets[i]];
         for (let j in r){
-            var js = j.split(" ");
-            var card = document.createElement("div");
-            card.classList.add("card");
-            card.classList.add("report-card");
-            card.style.display = "flex";
-            card.style.flexWrap = "wrap";
-            card.classList.add("anim");
-            var par = document.createElement("div");
-            par.style.width = "100%";
-            par.style.display = "flex";
-            var h3 = document.createElement("h3");
-            h3.style.margin = "0px";
-            h3.style.whiteSpace = "nowrap";
-            h3.style.overflow = "hidden";
-            h3.style.textOverflow = "ellipsis";
-            h3.innerText = js[0];
-            par.append(h3);
-            var exp = document.createElement("div");
-            exp.style.marginLeft = "auto";
-            exp.style.marginBottom = "auto";
-            exp.style.background = "var(--green)";
-            exp.style.color = "#fff";
-            exp.style.fontSize = "0.8em";
-            exp.style.padding = "2px 6px";
-            exp.style.borderRadius = "5px";
-            exp.style.whiteSpace = "nowrap";
-            exp.innerText = Number(targets[i].split("/")[1])+"/"+Number(targets[i].split("/")[2])+"まで";
-            par.append(exp);
-            card.append(par);
-            var h4 = document.createElement("h4");
-            h4.style.margin = "0px";
-            h4.style.marginBottom = "10px";
-            h4.style.fontWeight = "normal";
-            h4.style.fontSize = "0.8em";
-            h4.style.color = "var(--gray-text)";
-            h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"無カテゴリ";
-            card.append(h4);
-            var div = document.createElement("div");
-            div.style.display = "flex";
-            div.style.width = "100%";
-            var h4 = document.createElement("h4");
-            h4.style.margin = "0px";
-            h4.style.fontWeight = "normal";
-            h4.innerText = "完了率";
-            div.append(h4);
-            var rg = r[j].done === "100%"?"var(--green)":"var(--red)";
-            var par = document.createElement("div");
-            par.style.marginLeft = "auto";
-            par.style.color = rg;
-            var span1 = document.createElement("span");
-            span1.style.margin = "0px 0px 0px auto";
-            span1.style.fontSize = "1.5em";
-            span1.style.fontWeight = "bold";
-            span1.innerText = r[j].done.replace("%","");
-            par.append(span1);
-            var span2 = document.createElement("span");
-            span2.style.fontSize = "1.1em";
-            span2.style.marginLeft = "3px";
-            span2.innerText = "%";
-            par.append(span2);
-            div.append(par);
-            card.append(div);
-            var div = document.createElement("div");
-            var rg = r[j].done !== "100%"?"var(--red)":"var(--green)";
-            div.style.overflow = "hidden";
-            div.style.width = "100%";
-            div.style.height = "14px";
-            div.style.marginTop = "auto";
-            div.style.borderRadius = "10px";
-            div.style.background = "var(--gray)";
-            var div2 = document.createElement("div");
-            div2.style.height = "100%";
-            div2.style.width = r[j].done;
-            div2.style.background = rg;
-            div2.style.borderRadius = "10px";
-            div.append(div2);
-            card.append(div);
-            if (r[j].done !== "100%") {
-                section1.append(card);
-            } else {
-                section2.append(card);
+            for (let k in r[j]){
+                var js = j.split(" ");
+                var card = document.createElement("div");
+                card.classList.add("card");
+                card.classList.add("report-card");
+                card.style.display = "flex";
+                card.style.flexWrap = "wrap";
+                card.classList.add("anim");
+                var par = document.createElement("div");
+                par.style.width = "100%";
+                par.style.display = "flex";
+                var h3 = document.createElement("h3");
+                h3.style.margin = "0px";
+                h3.style.whiteSpace = "nowrap";
+                h3.style.overflow = "hidden";
+                h3.style.textOverflow = "ellipsis";
+                h3.innerText = js[0];
+                par.append(h3);
+                var exp = document.createElement("div");
+                exp.style.marginLeft = "auto";
+                exp.style.marginBottom = "auto";
+                exp.style.background = "var(--green)";
+                exp.style.color = "#fff";
+                exp.style.fontSize = "0.8em";
+                exp.style.padding = "2px 6px";
+                exp.style.borderRadius = "5px";
+                exp.style.whiteSpace = "nowrap";
+                exp.innerText = Number(targets[i].split("/")[1])+"/"+Number(targets[i].split("/")[2])+"まで";
+                par.append(exp);
+                card.append(par);
+                var h4 = document.createElement("h4");
+                h4.style.margin = "0px";
+                h4.style.marginBottom = "10px";
+                h4.style.fontWeight = "normal";
+                h4.style.fontSize = "0.8em";
+                h4.style.color = "var(--gray-text)";
+                h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"無カテゴリ";
+                card.append(h4);
+                var div = document.createElement("div");
+                div.style.display = "flex";
+                div.style.width = "100%";
+                var h4 = document.createElement("h4");
+                h4.style.margin = "0px";
+                h4.style.fontWeight = "normal";
+                h4.innerText = "完了率";
+                div.append(h4);
+                var rg = r[j][k].done === "100%"?"var(--green)":"var(--red)";
+                var par = document.createElement("div");
+                par.style.marginLeft = "auto";
+                par.style.color = rg;
+                var span1 = document.createElement("span");
+                span1.style.margin = "0px 0px 0px auto";
+                span1.style.fontSize = "1.5em";
+                span1.style.fontWeight = "bold";
+                span1.innerText = r[j][k].done.replace("%","");
+                par.append(span1);
+                var span2 = document.createElement("span");
+                span2.style.fontSize = "1.1em";
+                span2.style.marginLeft = "3px";
+                span2.innerText = "%";
+                par.append(span2);
+                div.append(par);
+                card.append(div);
+                var div = document.createElement("div");
+                var rg = r[j][k].done !== "100%"?"var(--red)":"var(--green)";
+                div.style.overflow = "hidden";
+                div.style.width = "100%";
+                div.style.height = "14px";
+                div.style.marginTop = "auto";
+                div.style.borderRadius = "10px";
+                div.style.background = "var(--gray)";
+                var div2 = document.createElement("div");
+                div2.style.height = "100%";
+                div2.style.width = r[j][k].done;
+                div2.style.background = rg;
+                div2.style.borderRadius = "10px";
+                div.append(div2);
+                card.append(div);
+                if (r[j].done !== "100%") {
+                    section1.append(card);
+                } else {
+                    section2.append(card);
+                }
             }
         }
     }
