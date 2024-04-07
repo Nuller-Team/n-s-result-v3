@@ -353,7 +353,7 @@ function write_report(change=false,close=false) {
                 h4.style.fontWeight = "normal";
                 h4.style.fontSize = "0.8em";
                 h4.style.color = "var(--gray-text)";
-                h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"無カテゴリ";
+                h4.innerText = js[1]!==undefined?js[1].replace("(","").replace(")",""):"未受講";
                 card.append(h4);
                 var div = document.createElement("div");
                 div.style.display = "flex";
@@ -395,7 +395,7 @@ function write_report(change=false,close=false) {
                 div2.style.borderRadius = "10px";
                 div.append(div2);
                 card.append(div);
-                if (r[j].done !== "100%") {
+                if (r[j][k].done !== "100%") {
                     section1.append(card);
                 } else {
                     section2.append(card);
@@ -491,7 +491,7 @@ function launch_nsresult() {
     header.style.width = "calc(100% - 40px)";
     header.style.padding = "10px 20px";
     header.style.display = "flex";
-    header.style.position = "fixed";
+    header.style.position = "sticky";
     header.style.top = "0";
     header.style.left = "0";
     header.style.zIndex = "1001";
@@ -585,7 +585,8 @@ function launch_nsresult() {
     var main = document.createElement("div");
     main.style.maxWidth = "800px";
     main.style.margin = "0px auto";
-    main.style.padding = "calc(40px + 50px) 20px 20px 20px";
+//    main.style.padding = "calc(40px + 50px) 20px 20px 20px";
+    main.style.padding = "20px 20px 20px 20px";
     main.style.overflowX = "hidden";
     main.id = "nsresult-main";
     div.append(main);
