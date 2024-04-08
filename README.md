@@ -22,4 +22,4 @@ N/SResultの利点は以下の通りです。
 ## 使用例
 N/SResultは以下のリンクからダウンロード可能です。使い方も以下のサイトに載っています。
 
-https://n-s-apps.nuller.jp/result
+https://n-s-apps.nuller.net/result

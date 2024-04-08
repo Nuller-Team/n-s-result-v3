@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "N/S Result",
-  "version": "3.0.2",
+  "version": "3.1",
   "description": "N/S高生が使える成績確認アプリ",
   "permissions": ["storage"],
   "icons": {

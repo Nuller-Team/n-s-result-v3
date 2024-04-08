@@ -35,7 +35,6 @@ function parse_report() {
 
 function gen_month_select(select_month, report) {
     select_month.innerHTML = "";
-    console.log(report);
     var selected = false;
     Object.keys(report.reports).sort().forEach(e=>{
         var option = document.createElement("option");
@@ -131,6 +130,234 @@ function cload() {
     load_div.append(load_circle);
     load.append(load_div);
     return load;
+}
+
+function get_color(theme, name) {
+    var colors = {"light": {"text": "#333", "gray": "#ddd", "grayb": "#eee", "gray-text": "#999", "back": "#f5f5f5", "hback": "#fff", "red":"#ff3333", "green": "#58C07F"}, "dark": {"text": "#eee", "gray": "#555", "grayb": "#333", "gray-text": "#999", "back": "#222", "hback": "#323232", "green": "#4ab06c", "logo-filter": "invert(99%) sepia(3%) saturate(1245%) hue-rotate(218deg) brightness(111%) contrast(87%)"}};
+    if (colors[theme][name] === undefined) return colors["light"][name];
+    return colors[theme][name];
+}
+
+function create_share() {
+    var div = document.createElement("div");
+    div.style.position = "fixed";
+    div.style.top = "0";
+    div.style.left = "0";
+    div.style.width = "100%";
+    div.style.height = "100%";
+    div.style.zIndex = "1000";
+    div.style.background = "rgba(0,0,0,0.5)";
+    div.style.color = "var(--text)";
+    div.style.display = "flex";
+    div.style.animation = "fadein 0.5s";
+    div.style.overflow = "auto";
+    var div_parent = document.createElement("div");
+    div_parent.style.margin = "auto";
+    div_parent.style.maxWidth = "500px";
+    div_parent.style.width = "100%";
+    div_parent.style.padding = "20px";
+    div_parent.style.background = "var(--hback)";
+    var header = document.createElement("div");
+    header.style.width = "100%";
+    header.style.display = "flex";
+    header.style.marginBottom = "20px";
+    var title = document.createElement("h2");
+    title.style.margin = "0px";
+    title.style.fontSize = "24px";
+    title.innerText = "共有";
+    header.append(title);
+    var close = document.createElement("button");
+    close.style.margin = "auto 0px";
+    close.style.marginLeft = "auto";
+    close.style.padding = "5px";
+    close.style.border = "none";
+    close.style.borderRadius = "5px";
+    close.style.background = "#f33";
+    close.style.color = "#fff";
+    close.style.cursor = "pointer";
+    close.style.display = "flex";
+    close.classList.add("nsresult-btn");
+    close.onclick = function(){
+        div.style.animation = "fadeout 0.5s";
+        div.style.opacity = "0";
+        setTimeout(function(){
+            div.remove();
+        },500);
+    }
+    div.onclick = function(e){
+        if (e.target === div) {
+            close.click();
+        }
+    }
+    var close_icon = document.createElement("div");
+    close_icon.innerText = "close";
+    close_icon.className = "material-symbols-outlined";
+    close_icon.style.margin = "auto";
+    close.append(close_icon);
+    var close_text = document.createElement("div");
+    close_text.innerText = "閉じる";
+    close_text.style.margin = "auto";
+    close_text.style.marginRight = "5px";
+    close_text.style.fontSize = "15px";
+    close.append(close_text);
+    header.append(close);
+    div_parent.append(header);
+    var img = new Image();
+    img.id = "nsresult-share-image";
+    img.style.width = "100%";
+    var img_div = document.createElement("div");
+    img_div.style.margin = "auto";
+    img_div.style.width = "100%";
+    img_div.style.display = "flex";
+    var img_parent = document.createElement("div");
+    img_parent.style.margin = "auto";
+    img_parent.append(img);
+    img_div.append(img_parent);
+    div_parent.append(img_div);
+    var controller = document.createElement("div");
+    var control_dark = document.createElement("div");
+    control_dark.style.display = "flex";
+    var is_dark = document.createElement("input");
+    is_dark.type = "checkbox";
+    is_dark.className = "switch";
+    is_dark.id = "nsresult-share-dark";
+    is_dark.onchange = function(){
+        generate_share_image();
+    }
+    control_dark.append(is_dark);
+    var label = document.createElement("label");
+    label.style.margin = "auto 0px";
+    label.style.width = "100%";
+    label.htmlFor = "nsresult-share-dark";
+    label.innerText = "ダークモード";
+    control_dark.append(label);
+    controller.append(control_dark);
+    div_parent.append(controller);
+    var download_btn = document.createElement("button");
+    download_btn.style.width = "100%";
+    download_btn.style.padding = "10px";
+    download_btn.style.border = "none";
+    download_btn.style.borderRadius = "5px";
+    download_btn.style.background = "var(--green)";
+    download_btn.style.color = "#fff";
+    download_btn.style.cursor = "pointer";
+    download_btn.style.marginTop = "20px";
+    download_btn.style.display = "flex";
+    download_btn.classList.add("nsresult-btn");
+    download_btn.onclick = function(){
+        var a = document.createElement("a");
+        a.href = document.getElementById("nsresult-share-image").src;
+        a.download = "nsresult_share.png";
+        a.click();
+    }
+    var download_icon = document.createElement("div");
+    download_icon.style.margin = "auto";
+    download_icon.style.marginRight = "0px";
+    download_icon.innerText = "download";
+    download_icon.className = "material-symbols-outlined";
+    download_btn.append(download_icon);
+    var download_text = document.createElement("div");
+    download_text.innerText = "ダウンロード";
+    download_text.style.margin = "auto 0px";
+    download_text.style.marginLeft = "5px";
+    download_text.style.marginRight = "auto";
+    download_text.style.fontSize = "15px";
+    download_btn.append(download_text);
+    div_parent.append(download_btn);
+    div.append(div_parent);
+    document.body.append(div);
+    generate_share_image();
+}
+
+function generate_share_image() {
+    var report = parse_report();
+    var theme = document.getElementById("nsresult-share-dark").checked?"dark":"light";
+    var end = document.getElementById("nsresult-select-month").value;
+    var done = 0;
+    var total = 0;
+    var report_count = 0;
+    var report_done = 0;
+    var color_back = get_color(theme, "back");
+    var color_header = get_color(theme, "hback");
+    var color_text = get_color(theme, "text");
+    var targets = [];
+    if (end === "all") {
+        targets = Object.keys(report.reports);
+    } else {
+        targets = [end];
+    }
+    for (let i in targets){
+        var r = report.reports[targets[i]];
+        for (let j in r){
+            for (let k in r[j]){
+                report_count += 1;
+                if (r[j].done === "100%") report_done++;
+                done += Number(r[j][k].done.replace("%",""));
+                total += 100;
+            }
+        }
+    }
+    var perc = Math.floor(done/total*100);
+    var canvas = document.createElement("canvas");
+    canvas.width = 1920;
+    canvas.height = 1080;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = color_back;
+    ctx.fillRect(0,0,1920,1080);
+    ctx.fillStyle = color_header;
+    ctx.fillRect(0,0,1920,150);
+    ctx.font = "bold 80px 'Noto Sans JP'";
+    ctx.fillStyle = color_text;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText(end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月",50,35);
+    ctx.fillStyle = perc===100?get_color(theme, "green"):get_color(theme, "red");
+    ctx.textAlign = "right";
+    ctx.fillText(perc+"%",1885,35);
+    ctx.textAlign = "left";
+    var n = 0;
+    for (let i in targets){
+        var r = report.reports[targets[i]];
+        for (let j in r){
+            for (let k in r[j]){
+                var js = j.split(" ");
+                var lpy = 125;
+                var y = 180+n*lpy;
+                var x = y-200 < 800?90:1000;
+                y = y-200 < 800?y:y - lpy * Math.floor(880/lpy);
+                var w = 810;
+                var h = 100;
+                ctx.fillStyle = color_back;
+                ctx.fillRect(x,y,w,h);
+                ctx.fillStyle = color_text;
+                ctx.font = "bold 48px 'Noto Sans JP'";
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
+                ctx.fillText(js[0],x+10,y+10);
+                ctx.font = "48px 'Noto Sans JP'";
+                ctx.font = "bold 48px 'Noto Sans JP'";
+                ctx.textAlign = "right";
+                var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
+                ctx.fillStyle = rg;
+                ctx.fillText(r[j][k].done.replace("%",""),x+w-25,y+10);
+                ctx.font = "30px 'Noto Sans JP'";
+                ctx.fillText("%",x+w+10,y+10+16);
+                var done = Number(r[j][k].done.replace("%",""));
+                ctx.fillStyle = get_color(theme, "gray");
+                ctx.fillRect(x+10,y+80,w,10);
+                ctx.fillStyle = rg;
+                ctx.fillRect(x+10,y+80,w*(done/100),10);
+                n++;
+            }
+        }
+    }
+    var logo_img = new Image();
+    logo_img.src = "chrome-extension://"+chrome.runtime.id+"/logo.svg";
+    logo_img.onload = function(){
+        ctx.filter = get_color(theme, "logo-filter");
+        ctx.drawImage(logo_img, 1920-logo_img.width-30, 1080-logo_img.height-30, logo_img.width, logo_img.height);
+        document.getElementById("nsresult-share-image").src = canvas.toDataURL();
+    }
 }
 
 function write_report(change=false,close=false) {
@@ -486,6 +713,9 @@ function launch_nsresult() {
     var style = document.createElement("style");
     style.innerHTML = "@keyframes fadein{from{opacity:0;}to{opacity:1;}}@keyframes fadeout{from{opacity:1;}to{opacity:0;}}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(359deg);}}@keyframes slidein{0%{transform:translateX(10px);opacity:0;}100%{transform:translateX(0px);opacity:1;}}@keyframes slideout{0%{transform:translateX(0px);opacity:1;}100%{transform:translateX(-10px);opacity:0;}}";
     div.append(style);
+    var style = document.createElement("style");
+    style.innerHTML = ".switch{-webkit-appearance:none;position:relative;border-radius:10px;min-width:32px;width:32px;height:20px;border:solid 1px var(--gray);background:var(--gray);overflow:hidden;transition:all .1s ease-out}.switch:checked{background:var(--green);border:solid 1px var(--green)}.switch:before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.2);}.switch:after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:all .1s ease-out}.switch:checked:after{left:14px}";
+    div.append(style);
     var header = document.createElement("header");
     header.style.height = "40px";
     header.style.width = "calc(100% - 40px)";
@@ -541,7 +771,8 @@ function launch_nsresult() {
     right.append(select_month);
     var close = document.createElement("button");
     close.style.margin = "auto 0px";
-    close.style.padding = "5px 10px";
+    close.style.marginRight = "10px";
+    close.style.padding = "5px";
     close.style.border = "none";
     close.style.borderRadius = "5px";
     close.style.background = "#f33";
@@ -578,6 +809,25 @@ function launch_nsresult() {
     close_text.style.fontSize = "15px";
     close.append(close_text);
     right.append(close);
+    var share = document.createElement("button");
+    share.style.margin = "auto 0px";
+    share.style.padding = "5px";
+    share.style.border = "solid 1px var(--gray)";
+    share.style.borderRadius = "5px";
+    share.style.background = "rgba(0,0,0,0)";
+    share.style.color = "var(--text)";
+    share.style.cursor = "pointer";
+    share.style.display = "flex";
+    share.classList.add("nsresult-btn");
+    share.onclick = function(){
+        create_share();
+    }
+    var share_icon = document.createElement("div");
+    share_icon.innerText = "share";
+    share_icon.className = "material-symbols-outlined";
+    share_icon.style.margin = "auto";
+    share.append(share_icon);
+    right.append(share);
     header_div.append(right);
     header.append(header_div);
     div.append(header);
@@ -585,7 +835,6 @@ function launch_nsresult() {
     var main = document.createElement("div");
     main.style.maxWidth = "800px";
     main.style.margin = "0px auto";
-//    main.style.padding = "calc(40px + 50px) 20px 20px 20px";
     main.style.padding = "20px 20px 20px 20px";
     main.style.overflowX = "hidden";
     main.id = "nsresult-main";
