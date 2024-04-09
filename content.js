@@ -112,7 +112,7 @@ function cload() {
     var load_div = document.createElement("div");
     load_div.style.margin = "auto";
     var load_logo = document.createElement("img");
-    load_logo.src = "chrome-extension://"+chrome.runtime.id+"/icon.svg";
+    load_logo.src = chrome.runtime.getURL("icon.svg");
     load_logo.style.width = "60px";
     load_logo.style.height = "60px";
     load_logo.style.filter = "var(--logo-filter)";
@@ -443,7 +443,7 @@ function generate_share_image() {
         n++;
     }
     var logo_img = new Image();
-    logo_img.src = "chrome-extension://"+chrome.runtime.id+"/logo.svg";
+    logo_img.src = chrome.runtime.getURL("logo.svg");
     logo_img.onload = function(){
         ctx.filter = get_color(theme, "logo-filter");
         ctx.drawImage(logo_img, 1920-logo_img.width-30, 1080-logo_img.height-30, logo_img.width, logo_img.height);
@@ -822,7 +822,7 @@ function launch_nsresult() {
     header_div.style.width = "100%";
     header_div.style.display = "flex";
     var logo = document.createElement("img");
-    logo.src = "chrome-extension://"+chrome.runtime.id+"/logo.svg";
+    logo.src = chrome.runtime.getURL("logo.svg");
     logo.style.height = "30px";
     logo.style.margin = "auto 0px";
     logo.style.filter = "var(--logo-filter,unset)";
