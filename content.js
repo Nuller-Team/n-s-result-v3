@@ -139,6 +139,7 @@ function get_color(theme, name) {
 }
 
 function create_share() {
+    if (document.getElementById("nsresult-share") !== null) return;
     var div = document.createElement("div");
     div.style.position = "fixed";
     div.style.top = "0";
@@ -151,6 +152,7 @@ function create_share() {
     div.style.display = "flex";
     div.style.animation = "fadein 0.5s";
     div.style.overflow = "auto";
+    div.id = "nsresult-share";
     var div_parent = document.createElement("div");
     div_parent.style.margin = "auto";
     div_parent.style.maxWidth = "500px";
@@ -233,6 +235,10 @@ function create_share() {
     control_dark.append(label);
     controller.append(control_dark);
     div_parent.append(controller);
+    var actions = document.createElement("div");
+    actions.style.width = "100%";
+    actions.style.display = "flex";
+    actions.style.whiteSpace = "nowrap";
     var download_btn = document.createElement("button");
     download_btn.style.width = "100%";
     download_btn.style.padding = "10px";
@@ -263,7 +269,81 @@ function create_share() {
     download_text.style.marginRight = "auto";
     download_text.style.fontSize = "15px";
     download_btn.append(download_text);
-    div_parent.append(download_btn);
+    actions.append(download_btn);
+    var copy_btn = document.createElement("button");
+    copy_btn.style.padding = "10px";
+    copy_btn.style.marginLeft = "10px";
+    copy_btn.style.border = "none";
+    copy_btn.style.borderRadius = "5px";
+    copy_btn.style.background = "var(--green)";
+    copy_btn.style.color = "#fff";
+    copy_btn.style.cursor = "pointer";
+    copy_btn.style.marginTop = "20px";
+    copy_btn.style.display = "flex";
+    copy_btn.classList.add("nsresult-btn");
+    copy_btn.onclick = function(){
+        var share_img = document.getElementById('nsresult-share-image');
+        var canvas = document.createElement('canvas');
+        canvas.width = share_img.naturalWidth;
+        canvas.height = share_img.naturalHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(share_img, 0, 0);
+        canvas.toBlob(async (blob) => {
+            var item = new ClipboardItem({
+                'image/png': blob
+            });
+            await navigator.clipboard.write([item]);
+            alert("クリップボードにコピーしました。");
+        });
+    }
+    var copy_icon = document.createElement("div");
+    copy_icon.style.margin = "auto";
+    copy_icon.style.marginRight = "0px";
+    copy_icon.innerText = "content_copy";
+    copy_icon.className = "material-symbols-outlined";
+    copy_btn.append(copy_icon);
+    var copy_text = document.createElement("div");
+    copy_text.innerText = "コピー";
+    copy_text.style.margin = "auto 0px";
+    copy_text.style.marginLeft = "5px";
+    copy_text.style.marginRight = "auto";
+    copy_text.style.fontSize = "15px";
+    copy_btn.append(copy_text);
+    actions.append(copy_btn);
+    var share_btn = document.createElement("button");
+    share_btn.style.padding = "10px";
+    share_btn.style.marginLeft = "10px";
+    share_btn.style.border = "none";
+    share_btn.style.borderRadius = "5px";
+    share_btn.style.background = "#1da1f2";
+    share_btn.style.color = "#fff";
+    share_btn.style.cursor = "pointer";
+    share_btn.style.marginTop = "20px";
+    share_btn.style.display = "flex";
+    share_btn.classList.add("nsresult-btn");
+    share_btn.onclick = function(){
+        var end = document.getElementById("nsresult-select-month").value;
+        var text = (end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月")+"のレポートの進捗状況";
+        var share_url = "https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
+        if (confirm("ツイート画面が開きます。\n画像は手動で添付して下さい。")){
+            window.open(share_url, "_blank");
+        }
+    }
+    var share_icon = document.createElement("div");
+    share_icon.style.margin = "auto";
+    share_icon.style.marginRight = "0px";
+    share_icon.innerText = "share";
+    share_icon.className = "material-symbols-outlined";
+    share_btn.append(share_icon);
+    var share_text = document.createElement("div");
+    share_text.innerText = "ツイート";
+    share_text.style.margin = "auto 0px";
+    share_text.style.marginLeft = "5px";
+    share_text.style.marginRight = "auto";
+    share_text.style.fontSize = "15px";
+    share_btn.append(share_text);
+    actions.append(share_btn);
+    div_parent.append(actions);
     div.append(div_parent);
     document.body.append(div);
     generate_share_image();
@@ -315,41 +395,52 @@ function generate_share_image() {
     ctx.textAlign = "right";
     ctx.fillText(perc+"%",1885,35);
     ctx.textAlign = "left";
-    var n = 0;
+    var rps = {};
     for (let i in targets){
         var r = report.reports[targets[i]];
         for (let j in r){
             for (let k in r[j]){
-                var js = j.split(" ");
-                var lpy = 125;
-                var y = 180+n*lpy;
-                var x = y-200 < 800?90:1000;
-                y = y-200 < 800?y:y - lpy * Math.floor(880/lpy);
-                var w = 810;
-                var h = 100;
-                ctx.fillStyle = color_back;
-                ctx.fillRect(x,y,w,h);
-                ctx.fillStyle = color_text;
-                ctx.font = "bold 48px 'Noto Sans JP'";
-                ctx.textAlign = "left";
-                ctx.textBaseline = "top";
-                ctx.fillText(js[0],x+10,y+10);
-                ctx.font = "48px 'Noto Sans JP'";
-                ctx.font = "bold 48px 'Noto Sans JP'";
-                ctx.textAlign = "right";
-                var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
-                ctx.fillStyle = rg;
-                ctx.fillText(r[j][k].done.replace("%",""),x+w-25,y+10);
-                ctx.font = "30px 'Noto Sans JP'";
-                ctx.fillText("%",x+w+10,y+10+16);
-                var done = Number(r[j][k].done.replace("%",""));
-                ctx.fillStyle = get_color(theme, "gray");
-                ctx.fillRect(x+10,y+80,w,10);
-                ctx.fillStyle = rg;
-                ctx.fillRect(x+10,y+80,w*(done/100),10);
-                n++;
+                rps[j] = rps[j] || [];
+                rps[j]["count"] = rps[j]["count"] || 0;
+                rps[j]["count"]++;
+                rps[j]["done"] = rps[j]["done"] || 0;
+                rps[j]["done"] += Number(r[j][k].done.replace("%",""));
             }
         }
+    }
+    for (let i in rps){
+        rps[i]["done"] = Math.floor(rps[i]["done"]/rps[i]["count"]);
+    }
+    var n = 0;
+    for (let j in rps){
+        var js = j.split(" ");
+        var lpy = 125;
+        var y = 180+n*lpy;
+        var x = y-200 < 800?90:1000;
+        y = y-200 < 800?y:y - lpy * Math.floor(880/lpy);
+        var w = 810;
+        var h = 100;
+        ctx.fillStyle = color_back;
+        ctx.fillRect(x,y,w,h);
+        ctx.fillStyle = color_text;
+        ctx.font = "bold 48px 'Noto Sans JP'";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText(js[0],x+10,y+10);
+        ctx.font = "48px 'Noto Sans JP'";
+        ctx.font = "bold 48px 'Noto Sans JP'";
+        ctx.textAlign = "right";
+        var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
+        ctx.fillStyle = rg;
+        ctx.fillText(rps[j].done,x+w-25,y+10);
+        ctx.font = "30px 'Noto Sans JP'";
+        ctx.fillText("%",x+w+10,y+10+16);
+        var done = rps[j].done;
+        ctx.fillStyle = get_color(theme, "gray");
+        ctx.fillRect(x+10,y+80,w,10);
+        ctx.fillStyle = rg;
+        ctx.fillRect(x+10,y+80,w*(done/100),10);
+        n++;
     }
     var logo_img = new Image();
     logo_img.src = "chrome-extension://"+chrome.runtime.id+"/logo.svg";
