@@ -150,7 +150,7 @@ function create_share() {
     div.style.background = "rgba(0,0,0,0.5)";
     div.style.color = "var(--text)";
     div.style.display = "flex";
-    div.style.animation = "fadein 0.5s";
+    div.style.animation = "fadein 0.25s";
     div.style.overflow = "auto";
     div.id = "nsresult-share";
     var div_parent = document.createElement("div");
@@ -180,11 +180,11 @@ function create_share() {
     close.style.display = "flex";
     close.classList.add("nsresult-btn");
     close.onclick = function(){
-        div.style.animation = "fadeout 0.5s";
+        div.style.animation = "fadeout 0.25s";
         div.style.opacity = "0";
         setTimeout(function(){
             div.remove();
-        },500);
+        },250);
     }
     div.onclick = function(e){
         if (e.target === div) {
@@ -322,8 +322,9 @@ function create_share() {
     share_btn.style.display = "flex";
     share_btn.classList.add("nsresult-btn");
     share_btn.onclick = function(){
-        var end = document.getElementById("nsresult-select-month").value;
-        var text = (end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月")+"のレポートの進捗状況";
+        var meta = JSON.parse(document.getElementById("nsresult-share-meta").value);
+        var end = meta.end;
+        var text = (end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月")+"のレポートの進捗状況 "+meta.perc+"%\n完了済み: "+meta.report_done+"/"+meta.report_count;
         var share_url = "https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
         if (confirm("ツイート画面が開きます。\n画像は手動で添付して下さい。")){
             window.open(share_url, "_blank");
@@ -345,6 +346,10 @@ function create_share() {
     actions.append(share_btn);
     div_parent.append(actions);
     div.append(div_parent);
+    var meta_input = document.createElement("input");
+    meta_input.type = "hidden";
+    meta_input.id = "nsresult-share-meta";
+    div.append(meta_input);
     document.body.append(div);
     generate_share_image();
 }
@@ -378,6 +383,7 @@ function generate_share_image() {
         }
     }
     var perc = Math.floor(done/total*100);
+    document.getElementById("nsresult-share-meta").value = JSON.stringify({"end":end,"perc":perc,"report_count":report_count,"report_done":report_done});
     var canvas = document.createElement("canvas");
     canvas.width = 1920;
     canvas.height = 1080;
@@ -430,12 +436,12 @@ function generate_share_image() {
         ctx.font = "48px 'Noto Sans JP'";
         ctx.font = "bold 48px 'Noto Sans JP'";
         ctx.textAlign = "right";
+        var done = rps[j].done;
         var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
         ctx.fillStyle = rg;
         ctx.fillText(rps[j].done,x+w-25,y+10);
         ctx.font = "30px 'Noto Sans JP'";
         ctx.fillText("%",x+w+10,y+10+16);
-        var done = rps[j].done;
         ctx.fillStyle = get_color(theme, "gray");
         ctx.fillRect(x+10,y+80,w,10);
         ctx.fillStyle = rg;
