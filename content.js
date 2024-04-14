@@ -376,7 +376,7 @@ function generate_share_image() {
         for (let j in r){
             for (let k in r[j]){
                 report_count += 1;
-                if (r[j].done === "100%") report_done++;
+                if (r[j][k].done === "100%") report_done++;
                 done += Number(r[j][k].done.replace("%",""));
                 total += 100;
             }
@@ -498,7 +498,7 @@ function write_report(change=false,close=false) {
         for (let j in r){
             for (let k in r[j]){
                 report_count += 1;
-                if (r[j].done === "100%") report_done++;
+                if (r[j][k].done === "100%") report_done++;
                 done += Number(r[j][k].done.replace("%",""));
                 total += 100;
             }
