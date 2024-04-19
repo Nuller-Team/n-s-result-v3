@@ -1009,8 +1009,7 @@ function launch_nsresult() {
     title.append(span);
     header.append(title);
     var close = document.createElement("button");
-    close.style.margin = "auto 0px";
-    close.style.marginLeft = "auto";
+    close.style.margin = "0px 0px auto auto";
     close.style.padding = "5px";
     close.style.border = "none";
     close.style.borderRadius = "5px";
@@ -1059,24 +1058,33 @@ function launch_nsresult() {
     update_detail.style.color = "var(--gray-text)";
     update_detail.innerText = "取得中...";
     updated_modal.append(update_detail);
+    var github_link = document.createElement("a");
+    github_link.href = "https://github.com/Nuller-Team/N-S-Result/releases";
+    github_link.target = "_blank";
+    github_link.innerText = "GitHubで確認";
+    updated_modal.append(github_link);
     updated.append(updated_modal);
 
     chrome.storage.local.get('lastversion', function (result) {
-        if (!result.lastversion || result.lastversion != version || true) {
+        if (!result.lastversion || result.lastversion != version) {
             var ajax = new XMLHttpRequest();
-            ajax.open("GET", "https://api.github.com/repos/Nuller-Team/N-S-Result/releases", true);
+            ajax.open("GET", "https://api.github.com/repos/Nuller-Team/N-S-Result/releases/tags/"+version);
             ajax.onload = function() {
                 var data = JSON.parse(ajax.responseText);
-                if (data[0] && data[0].tag_name == version) {
+                if (data["body"]) {
                     var span = document.createElement("span");
                     update_detail.style.color = "var(--text)";
-                    update_detail.innerText = data[0].body.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+                    update_detail.innerText = data.body.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+                    github_link.href = "https://github.com/Nuller-Team/N-S-Result/releases/tag/"+version;
                     chrome.storage.local.set({"lastversion": version}, function(){});
                 } else {
-                    update_detail.style.color = "var(--red)";
-                    update_detail.innerText = "取得に失敗しました。";
-                    chrome.storage.local.set({"lastversion": "invalid"}, function(){});
+                    ajax.onerror();
                 }
+            }
+            ajax.onerror = function() {
+                update_detail.style.color = "var(--red)";
+                update_detail.innerText = "取得に失敗しました。";
+                chrome.storage.local.set({"lastversion": "invalid"}, function(){});
             }
             div.append(updated);
             ajax.send();

@@ -32,7 +32,7 @@ chrome.storage.local.get('reports', function (result) {
         var m_report = reports["reports"][month];
         var done = true;
         for (var subject in m_report) {
-            for (let i in subject) {
+            for (let i in m_report[subject]) {
                 if (m_report[subject][i]["done"] !== "100%") {
                     done = false;
                     break;
