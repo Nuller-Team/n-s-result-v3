@@ -106,7 +106,7 @@ function cload() {
     load.style.left = "0";
     load.style.width = "100%";
     load.style.height = "100%";
-    load.style.zIndex = "1001";
+    load.style.zIndex = "1005";
     load.style.background = "var(--back)";
     load.style.display = "flex";
     var load_div = document.createElement("div");
@@ -140,6 +140,7 @@ function get_color(theme, name) {
 
 function create_share() {
     if (document.getElementById("nsresult-share") !== null) return;
+    var end = document.getElementById("nsresult-select-month").value;
     var div = document.createElement("div");
     div.style.position = "fixed";
     div.style.top = "0";
@@ -234,6 +235,25 @@ function create_share() {
     label.innerText = "ダークモード";
     control_dark.append(label);
     controller.append(control_dark);
+    if (end === "all") {
+        var control_month = document.createElement("div");
+        control_month.style.display = "flex";
+        var is_month = document.createElement("input");
+        is_month.type = "checkbox";
+        is_month.className = "switch";
+        is_month.id = "nsresult-share-ismonth";
+        is_month.onchange = function(){
+            generate_share_image();
+        }
+        control_month.append(is_month);
+        var label = document.createElement("label");
+        label.style.margin = "auto 0px";
+        label.style.width = "100%";
+        label.htmlFor = "nsresult-share-ismonth";
+        label.innerText = "月ごと";
+        control_month.append(label);
+        controller.append(control_month);
+    }
     div_parent.append(controller);
     var actions = document.createElement("div");
     actions.style.width = "100%";
@@ -357,6 +377,7 @@ function create_share() {
 function generate_share_image() {
     var report = parse_report();
     var theme = document.getElementById("nsresult-share-dark").checked?"dark":"light";
+    var ismonth = document.getElementById("nsresult-share-ismonth")===null?false:document.getElementById("nsresult-share-ismonth").checked;
     var end = document.getElementById("nsresult-select-month").value;
     var done = 0;
     var total = 0;
@@ -402,15 +423,31 @@ function generate_share_image() {
     ctx.fillText(perc+"%",1885,35);
     ctx.textAlign = "left";
     var rps = {};
-    for (let i in targets){
-        var r = report.reports[targets[i]];
-        for (let j in r){
-            for (let k in r[j]){
-                rps[j] = rps[j] || [];
-                rps[j]["count"] = rps[j]["count"] || 0;
-                rps[j]["count"]++;
-                rps[j]["done"] = rps[j]["done"] || 0;
-                rps[j]["done"] += Number(r[j][k].done.replace("%",""));
+    if (ismonth) {
+        for (let i in targets){
+            var r = report.reports[targets[i]];
+            var rn = targets[i];
+            for (let j in r){
+                for (let k in r[j]){
+                    rps[rn] = rps[rn] || [];
+                    rps[rn]["count"] = rps[rn]["count"] || 0;
+                    rps[rn]["count"]++;
+                    rps[rn]["done"] = rps[rn]["done"] || 0;
+                    rps[rn]["done"] += Number(r[j][k].done.replace("%",""));
+                }
+            }
+        }
+    } else {
+        for (let i in targets){
+            var r = report.reports[targets[i]];
+            for (let j in r){
+                for (let k in r[j]){
+                    rps[j] = rps[j] || [];
+                    rps[j]["count"] = rps[j]["count"] || 0;
+                    rps[j]["count"]++;
+                    rps[j]["done"] = rps[j]["done"] || 0;
+                    rps[j]["done"] += Number(r[j][k].done.replace("%",""));
+                }
             }
         }
     }
@@ -793,6 +830,7 @@ function write_report(change=false,close=false) {
 function launch_nsresult() {
     if (document.getElementById("nsresult") !== null) return;
     var report = parse_report();
+    var version = chrome.runtime.getManifest().version;
     document.body.style.overflow = "hidden";
     var div = document.createElement("div");
     div.id = "nsresult";
@@ -936,6 +974,114 @@ function launch_nsresult() {
     main.style.overflowX = "hidden";
     main.id = "nsresult-main";
     div.append(main);
+
+    var updated = document.createElement("div");
+    updated.style.width = "100%";
+    updated.style.height = "100%";
+    updated.style.display = "flex";
+    updated.style.position = "fixed";
+    updated.style.top = "0";
+    updated.style.left = "0";
+    updated.style.zIndex = "1001";
+    updated.style.background = "rgba(0,0,0,0.5)";
+    updated.style.animation = "fadein 0.25s";
+    var updated_modal = document.createElement("div");
+    updated_modal.style.maxWidth = "800px";
+    updated_modal.style.margin = "auto";
+    updated_modal.style.padding = "20px";
+    updated_modal.style.background = "var(--hback)";
+    updated_modal.style.borderRadius = "10px";
+    updated_modal.style.boxShadow = "0px 0px 25px rgba(0,0,0,0.1)";
+    var header = document.createElement("div");
+    header.style.width = "100%";
+    header.style.display = "flex";
+    header.style.marginBottom = "10px";
+    var title = document.createElement("div");
+    var h2 = document.createElement("h2");
+    h2.style.margin = "0px";
+    h2.innerText = "アップデート";
+    title.append(h2);
+    var span = document.createElement("span");
+    span.style.fontSize = "0.8em";
+    span.style.display = "block";
+    span.style.color = "var(--gray-text)";
+    span.innerText = version;
+    title.append(span);
+    header.append(title);
+    var close = document.createElement("button");
+    close.style.margin = "auto 0px";
+    close.style.marginLeft = "auto";
+    close.style.padding = "5px";
+    close.style.border = "none";
+    close.style.borderRadius = "5px";
+    close.style.background = "#f33";
+    close.style.color = "#fff";
+    close.style.cursor = "pointer";
+    close.style.display = "flex";
+    close.classList.add("nsresult-btn");
+    close.onclick = function(){
+        updated.style.animation = "fadeout 0.25s";
+        updated.style.opacity = "0";
+        setTimeout(function(){
+            updated.remove();
+        },250);
+    }
+    updated.onclick = function(e){
+        if (e.target === updated) {
+            close.click();
+        }
+    }
+    var close_icon = document.createElement("div");
+    close_icon.innerText = "close";
+    close_icon.className = "material-symbols-outlined";
+    close_icon.style.margin = "auto";
+    close.append(close_icon);
+    var close_text = document.createElement("div");
+    close_text.innerText = "閉じる";
+    close_text.style.margin = "auto";
+    close_text.style.marginRight = "5px";
+    close_text.style.fontSize = "15px";
+    close.append(close_text);
+    header.append(close);
+    updated_modal.append(header);
+    var span = document.createElement("span");
+    span.innerText = "N/S Resultがアップデートされました！";
+    updated_modal.append(span);
+    var span = document.createElement("span");
+    span.style.display = "block";
+    span.style.marginTop = "10px";
+    span.style.fontSize = "0.9em";
+    span.style.fontWeight = "bold";
+    span.innerText = "更新内容";
+    updated_modal.append(span);
+    var update_detail = document.createElement("span");
+    update_detail.style.display = "block";
+    update_detail.style.color = "var(--gray-text)";
+    update_detail.innerText = "取得中...";
+    updated_modal.append(update_detail);
+    updated.append(updated_modal);
+
+    chrome.storage.local.get('lastversion', function (result) {
+        if (!result.lastversion || result.lastversion != version || true) {
+            var ajax = new XMLHttpRequest();
+            ajax.open("GET", "https://api.github.com/repos/Nuller-Team/N-S-Result/releases", true);
+            ajax.onload = function() {
+                var data = JSON.parse(ajax.responseText);
+                if (data[0] && data[0].tag_name == version) {
+                    var span = document.createElement("span");
+                    update_detail.style.color = "var(--text)";
+                    update_detail.innerText = data[0].body.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+                    chrome.storage.local.set({"lastversion": version}, function(){});
+                } else {
+                    update_detail.style.color = "var(--red)";
+                    update_detail.innerText = "取得に失敗しました。";
+                    chrome.storage.local.set({"lastversion": "invalid"}, function(){});
+                }
+            }
+            div.append(updated);
+            ajax.send();
+        }
+    });
 
     var load = cload();
     div.append(load);
