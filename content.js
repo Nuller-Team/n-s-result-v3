@@ -510,7 +510,7 @@ function generate_share_image() {
         if (isperc) {
             ctx.fillText(rps[j].done,x+w-25,y+10);
         } else {
-            ctx.fillText(rps[j]["done_count"]+"/"+rps[j]["count"],x+w-25,y+10);
+            ctx.fillText(rps[j]["done_count"]+"/"+rps[j]["count"],x+w+10,y+10);
         }
         if (isperc) {
             ctx.font = "30px 'Noto Sans JP'";
