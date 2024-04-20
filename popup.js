@@ -7,7 +7,7 @@ chrome.storage.local.get('updated', function (result) {
     if (result.updated) {
         document.getElementById("reports").style.display = "block";
         var updated = new Date(result.updated);
-        document.getElementById("last_update").innerText = "最終更新: "+updated.getFullYear()+"/"+(updated.getMonth()+1)+"/"+updated.getDate()+" "+updated.getHours()+":"+updated.getMinutes();
+        document.getElementById("last_update").innerText = "最終更新: "+updated.getFullYear()+"/"+String(updated.getMonth()+1).padStart(2, "0")+"/"+String(updated.getDate()).padStart(2, "0")+" "+String(updated.getHours()).padStart(2, "0")+":"+String(updated.getMinutes()).padStart(2, "0");
     } else {
         document.getElementById("no_data").style.display = "flex";
         document.getElementById("reports").style.display = "none";

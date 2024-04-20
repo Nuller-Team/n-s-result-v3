@@ -254,24 +254,23 @@ function create_share() {
         control_month.append(label);
         controller.append(control_month);
     }
-    var control_perc = document.createElement("div");
-    control_perc.style.display = "flex";
-    var is_perc = document.createElement("input");
-    is_perc.type = "checkbox";
-    is_perc.className = "switch";
-    is_perc.id = "nsresult-share-isperc";
-    is_perc.checked = true;
-    is_perc.onchange = function(){
+    var control_done = document.createElement("div");
+    control_done.style.display = "flex";
+    var is_done = document.createElement("input");
+    is_done.type = "checkbox";
+    is_done.className = "switch";
+    is_done.id = "nsresult-share-isdone";
+    is_done.onchange = function(){
         generate_share_image();
     }
-    control_perc.append(is_perc);
+    control_done.append(is_done);
     var label = document.createElement("label");
     label.style.margin = "auto 0px";
     label.style.width = "100%";
-    label.htmlFor = "nsresult-share-isperc";
-    label.innerText = "パーセント表示";
-    control_perc.append(label);
-    controller.append(control_perc);
+    label.htmlFor = "nsresult-share-isdone";
+    label.innerText = "提出数表示";
+    control_done.append(label);
+    controller.append(control_done);
     div_parent.append(controller);
     var actions = document.createElement("div");
     actions.style.width = "100%";
@@ -396,7 +395,7 @@ function generate_share_image() {
     var report = parse_report();
     var theme = document.getElementById("nsresult-share-dark").checked?"dark":"light";
     var ismonth = document.getElementById("nsresult-share-ismonth")===null?false:document.getElementById("nsresult-share-ismonth").checked;
-    var isperc = document.getElementById("nsresult-share-isperc").checked;
+    var isdone = document.getElementById("nsresult-share-isdone").checked;
     var end = document.getElementById("nsresult-select-month").value;
     var done = 0;
     var total = 0;
@@ -439,10 +438,10 @@ function generate_share_image() {
     ctx.fillText(end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月",50,35);
     ctx.fillStyle = perc===100?get_color(theme, "green"):get_color(theme, "red");
     ctx.textAlign = "right";
-    if (isperc) {
-        ctx.fillText(perc+"%",1885,35);
-    } else {
+    if (isdone) {
         ctx.fillText(report_done+"/"+report_count,1885,35);
+    } else {
+        ctx.fillText(perc+"%",1885,35);
     }
     ctx.textAlign = "left";
     var rps = {};
@@ -507,17 +506,13 @@ function generate_share_image() {
         var done = rps[j].done;
         var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
         ctx.fillStyle = rg;
-        if (isperc) {
-            ctx.fillText(rps[j].done,x+w-25,y+10);
-        } else {
+        if (isdone) {
             ctx.fillText(rps[j]["done_count"]+"/"+rps[j]["count"],x+w+10,y+10);
-        }
-        if (isperc) {
+            done = Math.floor(rps[j]["done_count"]/rps[j]["count"]*100);
+        } else {
+            ctx.fillText(rps[j].done,x+w-25,y+10);
             ctx.font = "30px 'Noto Sans JP'";
             ctx.fillText("%",x+w+10,y+10+16);
-/*        } else {
-            ctx.font = "30px 'Noto Sans JP'";
-            ctx.fillText("/"+rps[j]["count"],x+w+10,y+10+16);*/
         }
         ctx.fillStyle = get_color(theme, "gray");
         ctx.fillRect(x+10,y+80,w,10);
@@ -1035,6 +1030,7 @@ function launch_nsresult() {
     updated_modal.style.background = "var(--hback)";
     updated_modal.style.borderRadius = "10px";
     updated_modal.style.boxShadow = "0px 0px 25px rgba(0,0,0,0.1)";
+    updated_modal.style.maxHeight = "calc(90%)";
     var header = document.createElement("div");
     header.style.width = "100%";
     header.style.display = "flex";
