@@ -254,6 +254,24 @@ function create_share() {
         control_month.append(label);
         controller.append(control_month);
     }
+    var control_perc = document.createElement("div");
+    control_perc.style.display = "flex";
+    var is_perc = document.createElement("input");
+    is_perc.type = "checkbox";
+    is_perc.className = "switch";
+    is_perc.id = "nsresult-share-isperc";
+    is_perc.checked = true;
+    is_perc.onchange = function(){
+        generate_share_image();
+    }
+    control_perc.append(is_perc);
+    var label = document.createElement("label");
+    label.style.margin = "auto 0px";
+    label.style.width = "100%";
+    label.htmlFor = "nsresult-share-isperc";
+    label.innerText = "パーセント表示";
+    control_perc.append(label);
+    controller.append(control_perc);
     div_parent.append(controller);
     var actions = document.createElement("div");
     actions.style.width = "100%";
@@ -378,6 +396,7 @@ function generate_share_image() {
     var report = parse_report();
     var theme = document.getElementById("nsresult-share-dark").checked?"dark":"light";
     var ismonth = document.getElementById("nsresult-share-ismonth")===null?false:document.getElementById("nsresult-share-ismonth").checked;
+    var isperc = document.getElementById("nsresult-share-isperc").checked;
     var end = document.getElementById("nsresult-select-month").value;
     var done = 0;
     var total = 0;
@@ -420,7 +439,11 @@ function generate_share_image() {
     ctx.fillText(end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月",50,35);
     ctx.fillStyle = perc===100?get_color(theme, "green"):get_color(theme, "red");
     ctx.textAlign = "right";
-    ctx.fillText(perc+"%",1885,35);
+    if (isperc) {
+        ctx.fillText(perc+"%",1885,35);
+    } else {
+        ctx.fillText(report_done+"/"+report_count,1885,35);
+    }
     ctx.textAlign = "left";
     var rps = {};
     if (ismonth) {
@@ -432,6 +455,10 @@ function generate_share_image() {
                     rps[rn] = rps[rn] || [];
                     rps[rn]["count"] = rps[rn]["count"] || 0;
                     rps[rn]["count"]++;
+                    rps[rn]["done_count"] = rps[rn]["done_count"] || 0;
+                    if (r[j][k].done === "100%") {
+                        rps[rn]["done_count"]++;
+                    }
                     rps[rn]["done"] = rps[rn]["done"] || 0;
                     rps[rn]["done"] += Number(r[j][k].done.replace("%",""));
                 }
@@ -445,6 +472,10 @@ function generate_share_image() {
                     rps[j] = rps[j] || [];
                     rps[j]["count"] = rps[j]["count"] || 0;
                     rps[j]["count"]++;
+                    rps[j]["done_count"] = rps[j]["done_count"] || 0;
+                    if (r[j][k].done === "100%") {
+                        rps[j]["done_count"]++;
+                    }
                     rps[j]["done"] = rps[j]["done"] || 0;
                     rps[j]["done"] += Number(r[j][k].done.replace("%",""));
                 }
@@ -476,9 +507,18 @@ function generate_share_image() {
         var done = rps[j].done;
         var rg = done === 100?get_color(theme, "green"):get_color(theme, "red");
         ctx.fillStyle = rg;
-        ctx.fillText(rps[j].done,x+w-25,y+10);
-        ctx.font = "30px 'Noto Sans JP'";
-        ctx.fillText("%",x+w+10,y+10+16);
+        if (isperc) {
+            ctx.fillText(rps[j].done,x+w-25,y+10);
+        } else {
+            ctx.fillText(rps[j]["done_count"]+"/"+rps[j]["count"],x+w-25,y+10);
+        }
+        if (isperc) {
+            ctx.font = "30px 'Noto Sans JP'";
+            ctx.fillText("%",x+w+10,y+10+16);
+/*        } else {
+            ctx.font = "30px 'Noto Sans JP'";
+            ctx.fillText("/"+rps[j]["count"],x+w+10,y+10+16);*/
+        }
         ctx.fillStyle = get_color(theme, "gray");
         ctx.fillRect(x+10,y+80,w,10);
         ctx.fillStyle = rg;
@@ -843,7 +883,10 @@ function launch_nsresult() {
     div.style.animation = "fadein 0.5s";
     div.style.overflowY = "scroll";
     var style = document.createElement("style");
-    style.innerHTML = ':root{--text:#333;--gray:#ddd;--grayb:#eee;--gray-text:#999;--back:#f5f5f5;--hback:#fff;--red:#ff3333;--green:#58C07F;}#nsresult{background:var(--back);color:var(--text);font-family:"Noto Sans JP", sans-serif;}#nsresult #nsresult-section-first{flex-wrap:nowrap;}#nsresult .card{margin:10px 10px;padding:20px;border-radius:10px;width:100%;background:var(--hback);box-shadow:0px 0px 25px rgba(0,0,0,0.08);}#nsresult .report-card{width:calc(100% / 3 - 60px);}#nsresult header{background:var(--hback);box-shadow:0px 0px 10px rgba(0, 0, 0, 0.2);}@media(prefers-color-scheme:dark){:root{--text:#eee;--gray:#555;--grayb:#333;--gray-text:#999;--back:#222;--hback:#323232;--green:#4ab06c;--logo-filter:invert(99%) sepia(3%) saturate(1245%) hue-rotate(218deg) brightness(111%) contrast(87%);}#nsresult header{box-shadow:none;}#nsresult .card{box-shadow:none;}}@media screen and (max-width: 800px){#nsresult #nsresult-section-first{flex-wrap:wrap;}#nsresult .report-card{width:calc(100% / 2 - 60px);}}@media screen and (max-width: 600px){#nsresult .report-card{width:calc(100% - 60px);}}';
+    style.innerHTML = ':root{--text:#333;--gray:#ddd;--grayb:#eee;--gray-text:#999;--back:#f5f5f5;--hback:#fff;--red:#ff3333;--green:#58C07F;--link:#264AF4;--link-visited:#6F23D0;}#nsresult{background:var(--back);color:var(--text);font-family:"Noto Sans JP", sans-serif;}#nsresult #nsresult-section-first{flex-wrap:nowrap;}#nsresult .card{margin:10px 10px;padding:20px;border-radius:10px;width:100%;background:var(--hback);box-shadow:0px 0px 25px rgba(0,0,0,0.08);}#nsresult .report-card{width:calc(100% / 3 - 60px);}#nsresult header{background:var(--hback);box-shadow:0px 0px 10px rgba(0, 0, 0, 0.2);}@media(prefers-color-scheme:dark){:root{--text:#eee;--gray:#555;--grayb:#333;--gray-text:#999;--back:#222;--hback:#323232;--green:#4ab06c;--link:#7096F8;--link-visited:#BB87FF;--logo-filter:invert(99%) sepia(3%) saturate(1245%) hue-rotate(218deg) brightness(111%) contrast(87%);}#nsresult header{box-shadow:none;}#nsresult .card{box-shadow:none;}}@media screen and (max-width: 800px){#nsresult #nsresult-section-first{flex-wrap:wrap;}#nsresult .report-card{width:calc(100% / 2 - 60px);}}@media screen and (max-width: 600px){#nsresult .report-card{width:calc(100% - 60px);}}';
+    div.append(style);
+    var style = document.createElement("style");
+    style.innerHTML = 'a{color:var(--link);}a:visited{color:var(--link-visited);}';
     div.append(style);
     var style = document.createElement("style");
     style.innerHTML = "@keyframes fadein{from{opacity:0;}to{opacity:1;}}@keyframes fadeout{from{opacity:1;}to{opacity:0;}}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(359deg);}}@keyframes slidein{0%{transform:translateX(10px);opacity:0;}100%{transform:translateX(0px);opacity:1;}}@keyframes slideout{0%{transform:translateX(0px);opacity:1;}100%{transform:translateX(-10px);opacity:0;}}";
