@@ -362,7 +362,7 @@ function create_share() {
         var meta = JSON.parse(document.getElementById("nsresult-share-meta").value);
         var end = meta.end;
         var text = (end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月")+"のレポートの進捗状況 "+meta.perc+"%\n完了済み: "+meta.report_done+"/"+meta.report_count;
-        var share_url = "https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
+        var share_url = "https://x.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
         if (confirm("ツイート画面が開きます。\n画像は手動で添付して下さい。")){
             window.open(share_url, "_blank");
         }
