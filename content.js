@@ -51,6 +51,16 @@ function gen_month_select(select_month, report) {
     option.innerText = "全期間";
     if (!selected) option.selected = true;
     select_month.append(option);
+    var now_query = new URLSearchParams(location.search);
+    var now_month = now_query.get("month");
+    if (now_month !== null) {
+        for (let i=0;i<select_month.children.length;i++){
+            if (select_month.children[i].value === now_month) {
+                select_month.value = now_month;
+                break;
+            }
+        }
+    }
     select_month.onchange = function(){
         write_report(true);
     }
@@ -362,7 +372,7 @@ function create_share() {
         var meta = JSON.parse(document.getElementById("nsresult-share-meta").value);
         var end = meta.end;
         var text = (end==="all"?"全期間":end.split("/")[0]+"年"+end.split("/")[1]+"月")+"のレポートの進捗状況 "+meta.perc+"%\n完了済み: "+meta.report_done+"/"+meta.report_count;
-        var share_url = "https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
+        var share_url = "https://x.com/intent/tweet?text="+encodeURIComponent(text)+"&hashtags=NSResult";
         if (confirm("ツイート画面が開きます。\n画像は手動で添付して下さい。")){
             window.open(share_url, "_blank");
         }
@@ -484,22 +494,45 @@ function generate_share_image() {
     for (let i in rps){
         rps[i]["done"] = Math.floor(rps[i]["done"]/rps[i]["count"]);
     }
+    var rps_count = Object.keys(rps).length;
     var n = 0;
+    var y = 180;
+    var rx = 50;
+    var x = rx;
+    var w = 1800;
+    var add_x = 1920;
+    var add_y = 125;
+    if (rps_count >= 7) {
+        w = 860;
+        add_x = 940;
+    }
+    if (rps_count >= 14) {
+        w = 560;
+        add_x = 620;
+    }
+    x -= add_x;
+    var h = 100;
     for (let j in rps){
         var js = j.split(" ");
-        var lpy = 125;
-        var y = 180+n*lpy;
-        var x = y-200 < 800?90:1000;
-        y = y-200 < 800?y:y - lpy * Math.floor(880/lpy);
-        var w = 810;
-        var h = 100;
+        x += add_x;
+        if (x+w > 1900) {
+            x = rx;
+            y += add_y;
+        }
         ctx.fillStyle = color_back;
         ctx.fillRect(x,y,w,h);
         ctx.fillStyle = color_text;
         ctx.font = "bold 48px 'Noto Sans JP'";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
-        ctx.fillText(js[0],x+10,y+10);
+        cname = js[0];
+        if (w === 560 && cname.length >= 9) {
+            cname = cname.slice(0,8)+"...";
+        }
+        if (w === 860 && cname.length >= 10) {
+            cname = cname.slice(0,9)+"...";
+        }
+        ctx.fillText(cname,x+10,y+10);
         ctx.font = "48px 'Noto Sans JP'";
         ctx.font = "bold 48px 'Noto Sans JP'";
         ctx.textAlign = "right";
@@ -529,8 +562,8 @@ function generate_share_image() {
     }
 }
 
-function write_report(change=false,close=false) {
-    if (change || close) {
+function write_report(change=false) {
+    if (change) {
         var n = 0;
         document.querySelectorAll("#nsresult .anim").forEach(e=>{
             var tn = 0;
@@ -545,11 +578,9 @@ function write_report(change=false,close=false) {
             e.style.animation = "slideout 0.25s ease "+((n+2)*0.025)+"s forwards";
             n++;
         });
-        if (change) {
-            setTimeout(function(){
-                write_report();
-            },500);
-        }
+        setTimeout(function(){
+            write_report();
+        },500);
         return;
     }
     var report = parse_report();
@@ -860,6 +891,11 @@ function write_report(change=false,close=false) {
         }
         n++;
     });
+    var now_query = new URLSearchParams(location.search);
+    now_query.set("studentTermId",document.getElementById("nsresult-select-year").value);
+    now_query.set("mode","new");
+    now_query.set("month",end);
+    history.replaceState(null, "", location.pathname+"?"+now_query.toString());
 }
 
 function launch_nsresult() {
@@ -954,7 +990,11 @@ function launch_nsresult() {
     close.style.display = "flex";
     close.classList.add("nsresult-btn");
     close.onclick = function(){
-        write_report(close=true);
+        var now_query = new URLSearchParams(location.search);
+        now_query.delete("mode");
+        now_query.delete("month");
+        now_query.set("studentTermId",document.getElementById("studentTermId").value);
+        history.replaceState(null, "", location.pathname+"?"+now_query.toString());
         var load = cload();
         load.style.animation = "fadein 0.25s";
         div.append(load);
