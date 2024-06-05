@@ -525,12 +525,13 @@ function generate_share_image() {
         ctx.font = "bold 48px 'Noto Sans JP'";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
-        cname = js[0];
-        if (w === 560 && cname.length >= 9) {
+        var cname = js[0];
+        var cname_len = new TextEncoder().encode(cname).length;
+        if (w === 560 && cname_len >= (8+1)*3) {
             cname = cname.slice(0,8)+"...";
         }
-        if (w === 860 && cname.length >= 10) {
-            cname = cname.slice(0,9)+"...";
+        if (w === 860 && cname_len >= (15+1)*3) {
+            cname = cname.slice(0,15)+"...";
         }
         ctx.fillText(cname,x+10,y+10);
         ctx.font = "48px 'Noto Sans JP'";
